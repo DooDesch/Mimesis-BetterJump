@@ -2,7 +2,7 @@
   "name": "BetterJump",
   "version_number": "1.2.0",
   "website_url": "https://github.com/DooDesch/Mimesis-BetterJump",
-  "description": "BetterJump is a lightweight MelonLoader mod for Mimesis that refines the player jump by smoothing momentum handling and exposing a few tweakable knobs.",
+  "description": "Makes jumping in the game actually useful. The default jumping in Mimesis is practically useless. This mod improves the jump mechanics so you can effectively navigate through the maps.",
   "dependencies": [
     "LavaGang-MelonLoader-0.7.1"
   ],
