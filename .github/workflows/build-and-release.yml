@@ -27,6 +27,12 @@ jobs:
           path: Workspace
           ssh-key: ${{ secrets.WORKSPACE_TOKEN }}
 
+      - name: Checkout MimicAPI repository
+        uses: actions/checkout@v4
+        with:
+          repository: NeoMimicry/MimicAPI
+          path: Workspace/MimicAPI
+
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -85,7 +91,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Build the project
-        run: dotnet build --configuration Release /p:GameManagedPath="${{ github.workspace }}/Workspace/lib/game" /p:MelonLoaderPath="${{ github.workspace }}/Workspace/lib/melonloader" /p:MimicAPIPath="${{ github.workspace }}/Workspace/MimicAPI"
+        run: dotnet build --configuration Release /p:WorkspaceLibPath="${{ github.workspace }}/Workspace/lib" /p:GameManagedPath="${{ github.workspace }}/Workspace/lib/game" /p:GameAssemblyPath="${{ github.workspace }}/Workspace/lib/game" /p:MelonLoaderPath="${{ github.workspace }}/Workspace/lib/melonloader" /p:MimicAPIPath="${{ github.workspace }}/Workspace/MimicAPI"
 
       - name: Prepare release directory
         run: |
