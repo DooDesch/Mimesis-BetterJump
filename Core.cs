@@ -1,5 +1,4 @@
 ﻿using BetterJump.Config;
-using HarmonyLib;
 using MelonLoader;
 
 #nullable enable
