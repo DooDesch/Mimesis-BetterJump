@@ -24,8 +24,8 @@ namespace BetterJump.Config
 
 			_category = MelonPreferences.CreateCategory(CategoryId, "BetterJump");
 			_enabled = CreateEntry("Enabled", true, "Enable BetterJump functionality");
-			_jumpVelocity = CreateEntry("JumpVelocity", 6.5f, "Jump velocity", "Upward speed applied when a jump starts (units/second).");
-			_forceUngroundTime = CreateEntry("ForceUngroundTime", 0.12f, "Force unground time", "Seconds to keep avatar airborne before the next ground check can succeed.");
+			_jumpVelocity = CreateEntry("JumpVelocity", 5.2f, "Jump velocity", "Upward speed applied when a jump starts (units/second).");
+			_forceUngroundTime = CreateEntry("ForceUngroundTime", 0.08f, "Force unground time", "Seconds to keep avatar airborne before the next ground check can succeed.");
 		}
 
 		private static MelonPreferences_Entry<T> CreateEntry<T>(string identifier, T defaultValue, string displayName, string? description = null)
