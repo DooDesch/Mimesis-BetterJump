@@ -182,14 +182,14 @@ jobs:
       - name: Upload to Thunderstore
         uses: GreenTF/upload-thunderstore-package@v4.3
         with:
-          namespace: DooDesch
-          description: Makes jumping in the game actually useful. The default jumping in Mimesis is practically useless. This mod improves the jump mechanics so you can effectively navigate through the maps.
           token: ${{ secrets.THUNDERSTORE_TOKEN }}
-          name: BetterJump
-          version: ${{ needs.build.outputs.version }}
           community: mimesis
+          namespace: DooDesch
+          name: BetterJump
+          description: Makes jumping in the game actually useful. The default jumping in Mimesis is practically useless. This mod improves the jump mechanics so you can effectively navigate through the maps.
+          version: ${{ needs.build.outputs.version }}
           repo: mimesis.thunderstore.io
+          path: thunderstore-package
           categories: |
-            Gameplay
-            Tweaks
+            Mods
 
