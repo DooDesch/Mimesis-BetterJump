@@ -1,5 +1,6 @@
 using BetterJump.Runtime;
 using HarmonyLib;
+using MelonLoader;
 using Mimic.Actors;
 
 namespace BetterJump.Patches

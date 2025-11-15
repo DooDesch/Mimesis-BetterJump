@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using BetterJump.Config;
-using HarmonyLib;
+using MelonLoader;
 using Mimic.Actors;
+using MimicAPI.GameAPI;
 using UnityEngine;
 
 namespace BetterJump.Runtime
@@ -17,15 +17,6 @@ namespace BetterJump.Runtime
 
 		private static readonly Dictionary<ProtoActor, ActorState> States = new();
 
-		private static readonly FieldInfo GroundedField = AccessTools.Field(typeof(ProtoActor), "<grounded>k__BackingField")
-			?? throw new MissingMemberException("ProtoActor.<grounded>k__BackingField");
-
-		private static readonly FieldInfo FallingField = AccessTools.Field(typeof(ProtoActor), "falling")
-			?? throw new MissingMemberException("ProtoActor.falling");
-
-		private static readonly FieldInfo FakeJumperOwnerField = AccessTools.Field(typeof(ProtoActor.FakeJumper), "owner")
-			?? throw new MissingMemberException("ProtoActor.FakeJumper.owner");
-
 		internal static void OnJumpStarted(ProtoActor.FakeJumper fakeJumper)
 		{
 			if (!BetterJumpPreferences.Enabled || fakeJumper == null)
@@ -33,7 +24,8 @@ namespace BetterJump.Runtime
 				return;
 			}
 
-			if (FakeJumperOwnerField.GetValue(fakeJumper) is not ProtoActor owner)
+			ProtoActor owner = ReflectionHelper.GetFieldValue<ProtoActor>(fakeJumper, "owner");
+			if (owner == null)
 			{
 				return;
 			}
@@ -81,11 +73,26 @@ namespace BetterJump.Runtime
 			States.Remove(actor);
 		}
 
-		private static bool GetGrounded(ProtoActor actor) => (bool)GroundedField.GetValue(actor)!;
+		private static bool GetGrounded(ProtoActor actor)
+		{
+			object value = ReflectionHelper.GetPropertyValue(actor, "grounded");
+			if (value != null && value is bool boolValue)
+			{
+				return boolValue;
+			}
+			value = ReflectionHelper.GetFieldValue(actor, "<grounded>k__BackingField");
+			if (value != null && value is bool boolValue2)
+			{
+				return boolValue2;
+			}
+			return false;
+		}
 
-		private static void SetGrounded(ProtoActor actor, bool value) => GroundedField.SetValue(actor, value);
+		private static void SetGrounded(ProtoActor actor, bool value)
+		{
+			ReflectionHelper.SetFieldValue(actor, "<grounded>k__BackingField", value);
+		}
 
-		private static void SetFalling(ProtoActor actor, float value) => FallingField.SetValue(actor, value);
+		private static void SetFalling(ProtoActor actor, float value) => ReflectionHelper.SetFieldValue(actor, "falling", value);
 	}
 }
-

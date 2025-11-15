@@ -5,6 +5,7 @@ using MelonLoader;
 
 [assembly: MelonInfo(typeof(BetterJump.Core), "BetterJump", "1.0.0", "DooDesch", null)]
 [assembly: MelonGame("ReLUGames", "MIMESIS")]
+[assembly: MelonOptionalDependencies("MimicAPI")]
 
 namespace BetterJump
 {

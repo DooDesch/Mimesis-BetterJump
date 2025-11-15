@@ -4,7 +4,8 @@
   "website_url": "https://github.com/DooDesch/Mimesis-BetterJump",
   "description": "Makes jumping in the game actually useful. The default jumping in Mimesis is practically useless. This mod improves the jump mechanics so you can effectively navigate through the maps.",
   "dependencies": [
-    "LavaGang-MelonLoader-0.7.1"
+    "LavaGang-MelonLoader-0.7.1",
+    "NeoMimicry-MimicAPI-0.1.1"
   ],
   "contributors": [
     "DooDesch"

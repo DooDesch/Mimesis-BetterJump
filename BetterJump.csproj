@@ -16,6 +16,7 @@
 		<WorkspaceLibPath Condition="'$(WorkspaceLibPath)' == ''">$(MSBuildThisFileDirectory)../Workspace/lib</WorkspaceLibPath>
 		<GameManagedPath Condition="'$(GameManagedPath)' == ''">$(MSBuildThisFileDirectory)../Workspace/lib/game</GameManagedPath>
 		<MelonLoaderPath Condition="'$(MelonLoaderPath)' == ''">$(MSBuildThisFileDirectory)../Workspace/lib/melonloader</MelonLoaderPath>
+		<MimicAPIPath Condition="'$(MimicAPIPath)' == ''">$(MSBuildThisFileDirectory)../Workspace/MimicAPI</MimicAPIPath>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -673,6 +674,8 @@
 	<PropertyGroup>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<!-- Suppress warnings from MimicAPI dependencies that are not needed at build time -->
+		<NoWarn>MSB3245</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -682,12 +685,21 @@
 		<Compile Include="Patches\FakeJumperPatches.cs" />
 		<Compile Include="Patches\ProtoActorPatches.cs" />
 	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="$(MimicAPIPath)/MimicAPI.csproj">
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
+	</ItemGroup>
 	
 	<PropertyGroup>
 		<ModsDirectory>F:\Launcher\SteamLibrary\steamapps\common\MIMESIS\Mods</ModsDirectory>
+		<GameExePath>F:\Launcher\SteamLibrary\steamapps\common\MIMESIS\MIMESIS.exe</GameExePath>
 	</PropertyGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(OS)' == 'Windows_NT'">
 		<Exec Condition="Exists('$(ModsDirectory)')" Command="cmd /c copy &quot;$(TargetPath)&quot; &quot;$(ModsDirectory)&quot;" ContinueOnError="true" />
+		<Exec Condition="Exists('$(ModsDirectory)') And Exists('$(MimicAPIPath)\bin\$(Configuration)\netstandard2.1\MimicAPI.dll')" Command="cmd /c copy &quot;$(MimicAPIPath)\bin\$(Configuration)\netstandard2.1\MimicAPI.dll&quot; &quot;$(ModsDirectory)&quot;" ContinueOnError="true" />
+		<Exec Condition="Exists('$(GameExePath)')" Command="powershell -Command &quot;if (-not (Get-Process -Name 'MIMESIS' -ErrorAction SilentlyContinue)) { Start-Process '$(GameExePath)' }&quot;" ContinueOnError="true" />
 	</Target>
 </Project>

@@ -12,6 +12,7 @@ namespace BetterJump.Config
 		private static MelonPreferences_Entry<bool> _enabled;
 		private static MelonPreferences_Entry<float> _jumpVelocity;
 		private static MelonPreferences_Entry<float> _forceUngroundTime;
+		private static MelonPreferences_Entry<bool> _debugLogs;
 
 		internal static void Initialize()
 		{
@@ -24,6 +25,7 @@ namespace BetterJump.Config
 			_enabled = CreateEntry("Enabled", true, "Enabled", "Enable BetterJump functionality. When disabled, the mod will not modify jump behavior.");
 			_jumpVelocity = CreateEntry("JumpVelocity", 5.2f, "Jump Velocity", "Upward speed applied when a jump starts (units/second). Higher values result in stronger jumps. Default: 5.2");
 			_forceUngroundTime = CreateEntry("ForceUngroundTime", 0.08f, "Force Unground Time", "Seconds to keep avatar airborne before the next ground check can succeed. This prevents the game from immediately detecting the ground after a jump, allowing for better jump responsiveness. Default: 0.08");
+			_debugLogs = CreateEntry("DebugLogs", false, "Debug Logs", "Enable detailed debug logging for troubleshooting jump behavior.");
 		}
 
 		private static MelonPreferences_Entry<T> CreateEntry<T>(string identifier, T defaultValue, string displayName, string description = null)
@@ -41,6 +43,8 @@ namespace BetterJump.Config
 		internal static float JumpVelocity => Mathf.Max(0f, _jumpVelocity.Value);
 
 		internal static float ForceUngroundTime => Mathf.Max(0.01f, _forceUngroundTime.Value);
+
+		internal static bool DebugLogs => _debugLogs.Value;
 	}
 }
 
