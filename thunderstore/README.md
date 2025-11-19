@@ -1,8 +1,13 @@
-# BetterJump
+# MIMESIS - BetterJump
 
 Makes jumping in the game actually useful.
 
 The default jumping in Mimesis is practically useless. This mod improves the jump mechanics so you can effectively navigate through the maps.
+
+![Version](https://img.shields.io/badge/version-1.3.0-blue)
+![Game](https://img.shields.io/badge/game-MIMESIS-purple)
+![MelonLoader](https://img.shields.io/badge/MelonLoader-0.7.1+-green)
+![Status](https://img.shields.io/badge/status-working-brightgreen)
 
 ## Features
 
