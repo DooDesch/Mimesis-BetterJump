@@ -1,5 +1,8 @@
 # MIMESIS - BetterJump
 
+> 🛟 **Need help or found a bug?** Get support at [support.doodesch.de](https://support.doodesch.de).
+
+
 > Makes jumping in Mimesis actually useful - the stock jump is near-useless for getting around, so BetterJump retunes it (stronger configurable jump plus a brief forced-airborne window) to clear gaps and obstacles reliably.
 
 ![Version](https://img.shields.io/badge/version-1.4.0-blue)
