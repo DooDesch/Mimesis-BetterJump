@@ -3,7 +3,7 @@ using MelonLoader;
 
 #nullable enable
 
-[assembly: MelonInfo(typeof(BetterJump.Core), "BetterJump", "1.4.0", "DooDesch", null)]
+[assembly: MelonInfo(typeof(BetterJump.Core), "BetterJump", "1.5.0", "DooDesch", null)]
 [assembly: MelonGame("ReLUGames", "MIMESIS")]
 [assembly: MelonOptionalDependencies("MimicAPI")]
 
@@ -15,7 +15,7 @@ namespace BetterJump
 		{
 			BetterJumpPreferences.Initialize();
 			HarmonyInstance.PatchAll();
-			MelonLogger.Msg("BetterJump initialized. JumpVelocity={0:F2}, ForceUngroundTime={1:F2}", BetterJumpPreferences.JumpVelocity, BetterJumpPreferences.ForceUngroundTime);
+			MelonLogger.Msg("BetterJump initialized. JumpVelocity={0:F2}, ForceUngroundTime={1:F2}, AirGravityScale={2:F2}", BetterJumpPreferences.JumpVelocity, BetterJumpPreferences.ForceUngroundTime, BetterJumpPreferences.AirGravityScale);
 		}
 	}
 }
