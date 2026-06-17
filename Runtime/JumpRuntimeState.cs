@@ -18,21 +18,21 @@ namespace BetterJump.Runtime
 			public float LastGravityTime;
 		}
 
-		// Sicherheits-Backstop: Selbst wenn der Actor nie landet (z. B. Sturz von einer Klippe
-		// in eine Kill-Zone), wird die reduzierte Flug-Schwerkraft spätestens nach dieser Zeit
-		// wieder freigegeben, damit kein dauerhaftes Schweben/State-Leak entsteht.
+		// Safety backstop: even if the actor never lands (e.g. falling off a cliff into a kill
+		// zone), the reduced air gravity is released after this time at the latest, so there is
+		// no permanent floating / state leak.
 		private const float MaxAirGravitySeconds = 8f;
 
-		// Der Boost wird erst nach dieser Verweildauer am Boden wieder freigegeben. Grund:
-		// CheckGrounded meldet grounded bereits ~0,1-0,15 m über dem Boden (großzügige SphereCast-
-		// Zone, checkGroundedDistance = 0.5), und im langsamen Flug-Sinkflug verweilt der Avatar
-		// dort mehrere Frames. Ohne diese Verriegelung könnte man genau dort in der Luft erneut
-		// "nachspringen" und sich hochstapeln. 0,15 s deckt selbst die floatigsten Settings ab.
+		// The boost is only re-armed after this much continuous ground contact. Reason:
+		// CheckGrounded already reports grounded ~0.1-0.15 m above the ground (generous SphereCast
+		// zone, checkGroundedDistance = 0.5), and during a slow floaty descent the avatar lingers
+		// there for several frames. Without this latch you could re-jump in mid-air right there
+		// and climb upwards. 0.15 s covers even the floatiest settings.
 		private const float LandSettleSeconds = 0.15f;
 
-		// Ab dieser Steiggeschwindigkeit (m/s) wirkt die reduzierte Schwerkraft voll; darunter wird
-		// linear auf normale Schwerkraft zurückgeblendet. Verhindert das lange Verharren am Scheitel
-		// ("unsichtbare Plattform"), ohne den floatigen Aufstieg zu verlieren.
+		// At or above this rising speed (m/s) the reduced gravity applies fully; below it, gravity
+		// is blended linearly back to normal. Prevents the long lingering at the apex
+		// ("invisible platform") without losing the floaty rise.
 		private const float ApexBlendSpeed = 2.5f;
 
 		private static readonly Dictionary<ProtoActor, ActorState> States = new();
@@ -64,8 +64,8 @@ namespace BetterJump.Runtime
 				return;
 			}
 
-			// Läuft bereits ein durch BetterJump geboosteter Sprung (Avatar noch nicht sauber
-			// gelandet)? Dann keinen weiteren Boost geben. Verhindert Mid-Air-"Nachspringen".
+			// Is a BetterJump-boosted jump already in progress (avatar has not cleanly landed yet)?
+			// Then do not apply another boost. Prevents mid-air re-jumping.
 			if (inProgress)
 			{
 				return;
@@ -78,10 +78,10 @@ namespace BetterJump.Runtime
 
 			SetFalling(owner, BetterJumpPreferences.JumpVelocity);
 			SetGrounded(owner, false);
-			// Game-Update 0.3.0: UpdateControl() setzt beim Übergang grounded->airborne
-			// (wasGrounded == true && grounded == false) "falling = 0f" und löscht damit den
-			// Sprung-Impuls. wasGrounded muss daher mit-zurückgesetzt werden, sonst hat der
-			// Sprung keine vertikale Wirkung mehr.
+			// Game update 0.3.0: UpdateControl() sets "falling = 0f" on the grounded->airborne
+			// transition (wasGrounded == true && grounded == false), which wipes the jump impulse.
+			// wasGrounded must therefore be reset as well, otherwise the jump has no vertical
+			// effect anymore.
 			SetWasGrounded(owner, false);
 
 			var state = new ActorState
@@ -112,25 +112,25 @@ namespace BetterJump.Runtime
 				MelonLogger.Msg("[DBG] tick {0}: y={1:F2} falling={2:F2} grounded={3} wasGrounded={4} ground={5} t={6:F2}", phase, GetHeight(actor), GetFalling(actor), GetGrounded(actor), GetWasGrounded(actor), GroundProbe(actor), Time.time);
 			}
 
-			// Phase 1: kurzes erzwungenes Unground-Fenster direkt nach dem Absprung, damit die
-			// grounded-Branch in UpdateControl den Steig-Impuls nicht abwürgt (deckt die ~0,4 m
-			// Steighöhe ab, in denen der Avatar die Boden-Erkennungszone noch nicht verlassen hat).
+			// Phase 1: short forced-unground window right after takeoff so the grounded branch in
+			// UpdateControl does not kill the upward impulse (covers the ~0.4 m of rise during which
+			// the avatar has not yet left the ground-detection zone).
 			if (Time.time < state.ForceUngroundUntil)
 			{
 				SetGrounded(actor, false);
-				// Während des erzwungenen Unground-Fensters konsistent halten, damit die neue
-				// wasGrounded-Logik in UpdateControl() den Steig-Impuls nicht doch noch nullt.
+				// Keep it consistent during the forced-unground window so the new wasGrounded logic
+				// in UpdateControl() does not zero the upward impulse after all.
 				SetWasGrounded(actor, false);
 				state.GroundedSince = -1f;
 				ApplyAirGravity(actor, state);
 				return;
 			}
 
-			// Phase 2: Fenster vorbei.
+			// Phase 2: window is over.
 			if (GetGrounded(actor))
 			{
-				// Bodenkontakt erkannt - aber erst nach LandSettleSeconds durchgehend am Boden als
-				// "gelandet" werten und den Boost wieder freigeben (siehe LandSettleSeconds).
+				// Ground contact detected - but only treat it as "landed" (and re-arm the boost)
+				// after LandSettleSeconds of continuous ground contact (see LandSettleSeconds).
 				if (state.GroundedSince < 0f)
 				{
 					state.GroundedSince = Time.time;
@@ -139,11 +139,11 @@ namespace BetterJump.Runtime
 				{
 					States.Remove(actor);
 				}
-				// grounded == true -> das Spiel steuert die Vertikalbewegung; nichts weiter tun.
+				// grounded == true -> the game drives the vertical movement; nothing else to do.
 				return;
 			}
 
-			// In der Luft: Verweildauer zurücksetzen und (nur im Steigflug) den Flugbogen abbremsen.
+			// Airborne: reset the dwell timer and (only while rising) slow down the arc.
 			state.GroundedSince = -1f;
 			if (Time.time >= state.AirGravityUntil)
 			{
@@ -189,8 +189,8 @@ namespace BetterJump.Runtime
 
 		private static float GetHeight(ProtoActor actor) => actor != null ? actor.transform.position.y : 0f;
 
-		// Diagnose: misst per Raycast die tatsächliche Distanz Füße->nächste Geometrie nach unten
-		// und nennt das getroffene Objekt. Zeigt, ob ein mid-air grounded auf echte Geometrie trifft.
+		// Diagnostics: raycasts downward to measure the actual distance feet->nearest geometry and
+		// names the hit object. Shows whether a mid-air grounded hits real geometry.
 		private static string GroundProbe(ProtoActor actor)
 		{
 			if (actor == null)
@@ -206,10 +206,10 @@ namespace BetterJump.Runtime
 			return "none";
 		}
 
-		// Verlängert die Airtime durch eine reduzierte effektive Schwerkraft - aber NUR im Steigflug.
-		// UpdateControl() addiert im selben Frame NACH diesem Postfix-Hook (CheckGrounded läuft
-		// laut Update() vor UpdateControl) "falling += Physics.gravity.y * deltaTime". Wir addieren
-		// vorab den fehlenden Anteil, sodass die Netto-Schwerkraft im Steigflug = scale * Original ergibt.
+		// Extends airtime via a reduced effective gravity - but ONLY while rising. UpdateControl()
+		// adds "falling += Physics.gravity.y * deltaTime" in the same frame AFTER this postfix hook
+		// (CheckGrounded runs before UpdateControl per Update()). We pre-add the missing part so the
+		// net gravity while rising equals scale * original.
 		private static void ApplyAirGravity(ProtoActor actor, ActorState state)
 		{
 			float scale = BetterJumpPreferences.AirGravityScale;
@@ -218,28 +218,28 @@ namespace BetterJump.Runtime
 				return;
 			}
 
-			// Nur den Steigflug abbremsen (falling > 0). Der Sinkflug bleibt bei normaler Schwerkraft:
-			// Sonst nähert man sich dem Boden so langsam, dass die grounded-Branch des Spiels die
-			// Sinkgeschwindigkeit abrupt auf ~0 nullt und man kurz auf einer "unsichtbaren Plattform"
-			// stehen bleibt. "Float up, fall normal" ist die saubere, ruckelfreie Variante.
+			// Only slow down the rise (falling > 0). The descent keeps normal gravity: otherwise you
+			// approach the ground so slowly that the game's grounded branch abruptly zeroes the
+			// descent speed and you briefly stand on an "invisible platform". "Float up, fall normal"
+			// is the clean, judder-free variant.
 			float current = GetFalling(actor);
 			if (current <= 0f)
 			{
 				return;
 			}
 
-			// Exakt einmal pro Frame. In diesem Spiel feuert CheckGrounded (und damit dieser Hook)
-			// zweimal pro Frame; ohne die Sperre würde der Gegenimpuls doppelt greifen und der
-			// Sprung wäre floatiger als eingestellt.
+			// Exactly once per frame. In this game CheckGrounded (and therefore this hook) fires
+			// twice per frame; without this guard the counter-impulse would apply twice and the jump
+			// would be floatier than configured.
 			if (state.LastGravityTime == Time.time)
 			{
 				return;
 			}
 			state.LastGravityTime = Time.time;
 
-			// Float nur solange der Avatar zügig steigt; zum Scheitel hin (kleine Steiggeschwindigkeit)
-			// zurück auf normale Schwerkraft blenden. Sonst geht falling sehr langsam durch 0 und der
-			// Avatar verharrt kurz am Apex = die "unsichtbare Plattform".
+			// Float only while the avatar is rising quickly; blend back to normal gravity towards the
+			// apex (small rising speed). Otherwise falling crosses 0 very slowly and the avatar
+			// lingers briefly at the apex = the "invisible platform".
 			float blend = Mathf.Clamp01(current / ApexBlendSpeed);
 			float effectiveScale = Mathf.Lerp(1f, scale, blend);
 			float counter = Physics.gravity.y * Time.deltaTime * (effectiveScale - 1f);
