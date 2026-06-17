@@ -133,6 +133,10 @@ jobs:
           cp bin/Release/netstandard2.1/BetterJump.dll nexus/
           MIMIC_DLL=$(find "${{ github.workspace }}/Workspace/MimicAPI" -path '*/bin/Release/*/MimicAPI.dll' | head -n1)
           if [ -z "$MIMIC_DLL" ]; then
+            # Some MimicAPI csproj revisions emit to bin/<tfm> without a Release subfolder.
+            MIMIC_DLL=$(find "${{ github.workspace }}/Workspace/MimicAPI" -path '*/bin/*/MimicAPI.dll' | head -n1)
+          fi
+          if [ -z "$MIMIC_DLL" ]; then
             echo "::error::MimicAPI.dll not found - refusing to ship an incomplete Nexus bundle" >&2
             exit 1
           fi
