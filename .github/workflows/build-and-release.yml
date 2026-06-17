@@ -124,6 +124,32 @@ jobs:
           name: BetterJump
           path: "BetterJump_${{ steps.version-check.outputs.version }}.zip"
 
+      - name: Prepare Nexus bundle (includes MimicAPI.dll)
+        run: |
+          # Nexus has no dependency resolution like Thunderstore, so the runtime dependency
+          # MimicAPI.dll must ship inside the Nexus archive. (Thunderstore keeps using the
+          # NeoMimicry-MimicAPI dependency instead, to avoid loading two copies of MimicAPI.)
+          mkdir -p nexus
+          cp bin/Release/netstandard2.1/BetterJump.dll nexus/
+          MIMIC_DLL=$(find "${{ github.workspace }}/Workspace/MimicAPI" -path '*/bin/Release/*/MimicAPI.dll' | head -n1)
+          if [ -z "$MIMIC_DLL" ]; then
+            echo "::error::MimicAPI.dll not found - refusing to ship an incomplete Nexus bundle" >&2
+            exit 1
+          fi
+          cp "$MIMIC_DLL" nexus/
+          if [ -f "thunderstore/README.md" ]; then
+            cp thunderstore/README.md nexus/ || true
+          fi
+          zip -j "BetterJump_${{ steps.version-check.outputs.version }}_nexus.zip" nexus/*
+          echo "Nexus bundle contents:"
+          unzip -l "BetterJump_${{ steps.version-check.outputs.version }}_nexus.zip"
+
+      - name: Upload Nexus ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: BetterJump-nexus
+          path: "BetterJump_${{ steps.version-check.outputs.version }}_nexus.zip"
+
   release:
     needs: build
     runs-on: ubuntu-latest
@@ -217,17 +243,17 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download built ZIP
+      - name: Download Nexus bundle (BetterJump.dll + MimicAPI.dll)
         uses: actions/download-artifact@v4
         with:
-          name: BetterJump
+          name: BetterJump-nexus
 
       - name: Upload to Nexus Mods
         uses: Nexus-Mods/upload-action@v1.0.0-beta.7
         with:
           api_key: ${{ secrets.NEXUSMODS_API_KEY }}
           file_group_id: "7545368"
-          filename: "BetterJump_${{ needs.build.outputs.version }}.zip"
+          filename: "BetterJump_${{ needs.build.outputs.version }}_nexus.zip"
           version: ${{ needs.build.outputs.version }}
           display_name: "BetterJump ${{ needs.build.outputs.version }}"
           file_category: main
