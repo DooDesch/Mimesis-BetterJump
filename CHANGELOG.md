@@ -4,6 +4,12 @@ All notable changes to BetterJump are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to Semantic Versioning.
 
+## [1.5.1] - 2026-06-17
+
+### Changed
+- Started maintaining a full changelog that is now published on GitHub, Thunderstore
+  and Nexus. No gameplay changes compared to 1.5.0.
+
 ## [1.5.0] - 2026-06-17
 
 ### Fixed

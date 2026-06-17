@@ -3,7 +3,7 @@ using MelonLoader;
 
 #nullable enable
 
-[assembly: MelonInfo(typeof(BetterJump.Core), "BetterJump", "1.5.0", "DooDesch", null)]
+[assembly: MelonInfo(typeof(BetterJump.Core), "BetterJump", "1.5.1", "DooDesch", null)]
 [assembly: MelonGame("ReLUGames", "MIMESIS")]
 [assembly: MelonOptionalDependencies("MimicAPI")]
 
