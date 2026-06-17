@@ -4,6 +4,12 @@ All notable changes to BetterJump are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to Semantic Versioning.
 
+## [1.5.2] - 2026-06-17
+
+### Fixed
+- The Nexus file description now uses BBCode so the changelog renders cleanly there
+  (it previously showed raw Markdown). No gameplay changes compared to 1.5.1.
+
 ## [1.5.1] - 2026-06-17
 
 ### Changed
