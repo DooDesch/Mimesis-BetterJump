@@ -4,6 +4,11 @@ All notable changes to BetterJump are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 project adheres to Semantic Versioning.
 
+## [1.5.3] - 2026-06-22
+
+### Fixed
+- The mod's Harmony patches were applied twice (MelonLoader auto-applies them, and the mod also called PatchAll() itself), so every jump patch ran twice. The redundant call was removed; patches now apply exactly once.
+
 ## [1.5.2] - 2026-06-17
 
 ### Fixed
